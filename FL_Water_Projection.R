@@ -54,8 +54,16 @@ ui <- fluidPage(
 server <- function(input, output) {
     
     #read the data
-    FL_wateruse2023 <- read_excel("FL_water_demand_2023Report.xlsx", sheet = 1, col_names = TRUE)
-    FL_wateruse2023 <- data.frame(FL_wateruse2023)
+    # FL_wateruse2023 <- read_excel("FL_water_demand_2023Report.xlsx", sheet = 1, col_names = TRUE)
+    # FL_wateruse2023 <- data.frame(FL_wateruse2023)
+    PS <- c(2368.574, 2590.553, 2768.085, 2917.864, 3052.453, 3181.454)
+    DSS <- c(232.2403, 249.9549, 269.4988, 286.0526, 301.3125, 316.8192)
+    AG <- c(2431.679, 2452.643, 2455.590, 2465.505, 2479.168, 2492.438)
+    LR <- c(515.254, 556.494, 588.816, 619.055, 646.892, 673.971)
+    CII <- c(409.349, 445.779, 461.339, 476.682, 484.070, 491.828)
+    PG <- c(127.756, 141.307, 143.770, 160.472, 177.862, 179.828)
+    Year <- c(2015, 2020, 2025, 2030, 2035, 2040)
+    FL_wateruse2023 <- data.frame(Year= Year, PS=PS, DSS=DSS, AG=AG, LR=LR, CII=CII, PG=PG)
     
     # create a data frame for plotting
     
