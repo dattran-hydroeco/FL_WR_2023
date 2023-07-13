@@ -1,13 +1,15 @@
 # library("rstudioapi")
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) 
 
-library(tidyverse)
+# library(tidyverse)
 library("readxl")
 library("data.table")
 library(openxlsx)
 library("reshape2")
 library(showtext)
 library(shiny)
+library(dplyr)
+library(ggplot2)
 
 
 # Use a fluid Bootstrap layout
@@ -66,28 +68,28 @@ server <- function(input, output) {
     Year <- c(2015, 2020, 2025, 2030, 2035, 2040)
     FL_wateruse2023 <- data.frame(Year= Year, PS=PS, DSS=DSS, AG=AG, LR=LR, CII=CII, PG=PG)
     
-    # create a data frame for plotting
+    FL_wateruse2023 <- reshape2::melt(FL_wateruse2023,id.vars=c("Year"), variable.names=c("water_use", "caterogy") )
+    names(FL_wateruse2023) <- c("Year", "Caterogy", "water_use")
     
+    FL_wateruse2023 <- FL_wateruse2023 %>%
+        group_by(Year) %>%
+        mutate(y_label = cumsum(water_use) - 0.5*water_use)
+
+     
+    # create a data frame for plotting
     df <- reactive({
         req(input$Cat)
         
-        #FL_wateruse2023 <- FL_wateruse2023 %>% select(Year=Year, Value=input$Cat)
-        FL_wateruse2023 <- reshape2::melt(FL_wateruse2023,id.vars=c("Year"), variable.names=c("water_use", "caterogy") )
-        names(FL_wateruse2023) <- c("Year", "Caterogy", "water_use")        
-        
         if(input$Cat != "All") {
-            FL_wateruse2023 <- FL_wateruse2023 %>% filter(Caterogy %in% c(as.character(input$Cat)) ) %>% 
-                mutate(y_label = cumsum(water_use) - 0.5*water_use)
+            FL_wateruse2023 <- FL_wateruse2023 %>% filter(Caterogy %in% c(as.character(input$Cat)) ) 
+            
         } else {
-            FL_wateruse2023 <- FL_wateruse2023 %>% 
-                mutate(y_label = cumsum(water_use) - 0.5*water_use)
+            FL_wateruse2023 <- FL_wateruse2023
         }
-        
-        
         
     })
     
-    
+
     # Fill in the spot we created for a plot
     output$waterusePlot <- renderPlot({
         
@@ -137,10 +139,10 @@ server <- function(input, output) {
             theme(legend.justification = "left") + 
             theme(axis.title.x = element_text(family = my_font, size = 16, color = "grey30")) + 
             theme(axis.title.y = element_text(family = my_font, size = 16, color = "grey30")) +
-            theme(panel.grid = element_line(color = "white", size = 0.75)) + 
-            geom_text(aes(label = round(water_use,0)), y = y_label, size=5, color = "grey30", family = my_font)
-        
-        
+            theme(panel.grid = element_line(color = "white", size = 0.75)) 
+            # geom_text(aes(label = round(water_use,0), y = y_label), size=5, color = "grey30", family = my_font)
+
+
         
     })
     
