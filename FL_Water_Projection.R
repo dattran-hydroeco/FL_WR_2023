@@ -10,7 +10,7 @@ library(showtext)
 
 
 # Use a fluid Bootstrap layout
-fluidPage(
+ui <- fluidPage(
     # fileInput('file1', 'Show Water Use Data',
     #           accept = c('.xlsx')
     #           ),
@@ -51,7 +51,7 @@ fluidPage(
 
 
 # Define a server for the Shiny app
-function(input, output) {
+server <- function(input, output) {
     
     #read the data
     FL_wateruse2023 <- read_excel("FL_water_demand_2023Report.xlsx", sheet = 1, col_names = TRUE)
@@ -118,6 +118,7 @@ function(input, output) {
             theme(strip.text = element_text(color = "grey20", 
                                             family = my_font, hjust = -0.04, size = 16, face = "bold")) +
             ### Adjust axis
+            labs(x="Year", y="Water Use (mgd)") + 
             theme(panel.grid.minor = element_blank()) + 
             theme(panel.grid.major.x = element_blank()) + 
             theme(axis.text.x = element_text(family = my_font, size = 16, color = "grey30")) + 
@@ -133,5 +134,6 @@ function(input, output) {
     
 }
 
-runApp()
+shinyApp(ui = ui, server = server)
+
 

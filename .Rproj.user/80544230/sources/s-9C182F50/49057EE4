@@ -1,0 +1,26 @@
+{
+    "id": "49057EE4",
+    "path": "~/GitHub/FL_WaterUse_Projection_23/FL_WR_2023/FL_Water_Projection.R",
+    "project_path": "FL_Water_Projection.R",
+    "type": "r_source",
+    "hash": "599462079",
+    "contents": "",
+    "dirty": false,
+    "created": 1689275915305.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "136,34",
+        "scrollLine": "109"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1689276151,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1689276151764,
+    "read_only": false,
+    "read_only_alternatives": []
+}
