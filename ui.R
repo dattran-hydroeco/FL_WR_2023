@@ -1,0 +1,46 @@
+library("rstudioapi")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) 
+
+library(tidyverse)
+library("readxl")
+library("data.table")
+library(openxlsx)
+
+
+# Use a fluid Bootstrap layout
+fluidPage(
+    # fileInput('file1', 'Show Water Use Data',
+    #           accept = c('.xlsx')
+    #           ),
+    
+    # Give the page a title
+    titlePanel("Water Use Projection (in million gallon per day [mgd])"),
+    
+    # Generate a row with a sidebar
+    sidebarLayout(      
+        
+        # Define the sidebar with one input
+        sidebarPanel(
+            selectInput("Cat", "Water Use Categrogy:", 
+                        #choices=colnames(FL_wateruse2023)[-1] ),
+            choices=c("PS","DSS","AG","LR","CII","PG", "All") ),
+                        
+            hr("Source:  Data from Florida Department of Environmental Protection"),
+            helpText("PS = Public Supply"),
+            helpText("DSS = Domestic Self Supply"),
+            helpText("AG = Agriculture"),
+            helpText("LR = Landscape & Recreational"),
+            helpText("CII = Commercial/Industrial/Institutional"),
+            helpText("PG = Power Generation"),
+            helpText("Unit: million gallon per day (mgd)")
+        ),
+        
+        # Create a spot for the barplot
+        mainPanel(
+            tableOutput('contents'),
+            plotOutput("waterusePlot")
+
+        )
+        
+    )
+)
