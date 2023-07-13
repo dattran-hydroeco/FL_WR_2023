@@ -7,6 +7,7 @@ library("data.table")
 library(openxlsx)
 library("reshape2")
 library(showtext)
+library(shiny)
 
 
 # Use a fluid Bootstrap layout
