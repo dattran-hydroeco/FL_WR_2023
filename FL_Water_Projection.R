@@ -76,9 +76,11 @@ server <- function(input, output) {
         names(FL_wateruse2023) <- c("Year", "Caterogy", "water_use")        
         
         if(input$Cat != "All") {
-            FL_wateruse2023 <- FL_wateruse2023 %>% filter(Caterogy %in% c(as.character(input$Cat)))           
+            FL_wateruse2023 <- FL_wateruse2023 %>% filter(Caterogy %in% c(as.character(input$Cat)) ) %>% 
+                mutate(y_label = cumsum(water_use) - 0.5*water_use)
         } else {
-            FL_wateruse2023 <- FL_wateruse2023
+            FL_wateruse2023 <- FL_wateruse2023 %>% 
+                mutate(y_label = cumsum(water_use) - 0.5*water_use)
         }
         
         
@@ -135,7 +137,8 @@ server <- function(input, output) {
             theme(legend.justification = "left") + 
             theme(axis.title.x = element_text(family = my_font, size = 16, color = "grey30")) + 
             theme(axis.title.y = element_text(family = my_font, size = 16, color = "grey30")) +
-            theme(panel.grid = element_line(color = "white", size = 0.75))
+            theme(panel.grid = element_line(color = "white", size = 0.75)) + 
+            geom_text(aes(label = round(water_use,0)), y = y_label, size=5, color = "grey30", family = my_font)
         
         
         
