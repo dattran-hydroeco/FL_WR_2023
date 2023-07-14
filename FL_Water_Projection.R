@@ -10,6 +10,7 @@ library(showtext)
 library(shiny)
 library(dplyr)
 library(ggplot2)
+library(knitr)
 
 
 # Use a fluid Bootstrap layout
@@ -18,18 +19,28 @@ ui <- fluidPage(
     #           accept = c('.xlsx')
     #           ),
     
-    # Give the page a title
+    ## Give the page a title
     titlePanel(h3("Water Use Projection (in million gallon per day [mgd])")),
     
-    # Generate a row with a sidebar
+    ## Generate a row with a sidebar
     sidebarLayout(      
         
-        # Define the sidebar with one input
+        ## Define the sidebar with one input
         sidebarPanel(
-            selectInput("Cat", "Water Use Categrogy:", 
+            selectInput("Cat", "Select Water Use Categrogy", 
                         #choices=colnames(FL_wateruse2023)[-1] ),
-            choices=c("PS","DSS","AG","LR","CII","PG", "All") ),
-                        
+            choices=c("PS","DSS","AG","LR","CII","PG", "Total") ),
+            
+            downloadButton("downloadData1", "Download"),
+            
+            # selectInput("WaterTable", "Show Water Use Projection in Table",
+            #             choices=c("Yes","No") ),
+            
+            # selectInput("Expen", "Show Expenditure", 
+            #             choices=c("By Project Type","Total") ),
+            
+            # downloadButton("downloadData2", "Download"),
+            
             hr("Source:  Data from Florida Department of Environmental Protection"),
             helpText("PS = Public Supply"),
             helpText("DSS = Domestic Self Supply"),
@@ -40,10 +51,10 @@ ui <- fluidPage(
             helpText("Unit: million gallon per day (mgd)")
         ),
         
-        # Create a spot for the barplot
+        ## Create a spot for the barplot
         mainPanel(
-            tableOutput('contents'),
-            plotOutput("waterusePlot")
+            plotOutput("waterusePlot"),
+            tableOutput('wateruseTable')
 
         )
         
@@ -53,10 +64,10 @@ ui <- fluidPage(
 
 
 
-# Define a server for the Shiny app
+## Define a server for the Shiny app
 server <- function(input, output) {
     
-    #read the data
+    ## Water Use data
     # FL_wateruse2023 <- read_excel("FL_water_demand_2023Report.xlsx", sheet = 1, col_names = TRUE)
     # FL_wateruse2023 <- data.frame(FL_wateruse2023)
     PS <- c(2368.574, 2590.553, 2768.085, 2917.864, 3052.453, 3181.454)
@@ -66,21 +77,32 @@ server <- function(input, output) {
     CII <- c(409.349, 445.779, 461.339, 476.682, 484.070, 491.828)
     PG <- c(127.756, 141.307, 143.770, 160.472, 177.862, 179.828)
     Year <- c(2015, 2020, 2025, 2030, 2035, 2040)
-    FL_wateruse2023 <- data.frame(Year= Year, PS=PS, DSS=DSS, AG=AG, LR=LR, CII=CII, PG=PG)
+    FL_wateruse2023 <- data.frame(Year= round(Year,0), PS=round(PS,0), DSS=round(DSS,0), 
+                                  AG=round(AG,0), LR=round(LR,0), CII=round(CII,0), PG=round(PG, 0))
     
     FL_wateruse2023 <- reshape2::melt(FL_wateruse2023,id.vars=c("Year"), variable.names=c("water_use", "caterogy") )
     names(FL_wateruse2023) <- c("Year", "Caterogy", "water_use")
     
-    FL_wateruse2023 <- FL_wateruse2023 %>%
-        group_by(Year) %>%
-        mutate(y_label = cumsum(water_use) - 0.5*water_use)
+    # FL_wateruse2023 <- FL_wateruse2023 %>%
+    #     group_by(Year) %>%
+    #     mutate(y_label = cumsum(water_use) - 0.5*water_use)
+    
+    ## Data for table
+    FL_wateruse2023v1 <- data.frame(Year= as.character(Year), PS=round(PS,2), DSS=round(DSS,2), 
+                                  AG=round(AG,2), LR=round(LR,2), CII=round(CII,1), PG=round(PG, 2))
+    
+    ## Expenditure data
+    
+
 
      
-    # create a data frame for plotting
+    ## create a data frame for plotting
     df <- reactive({
         req(input$Cat)
+        # req(input$WaterTable)
+        # req(input$Expen)
         
-        if(input$Cat != "All") {
+        if(input$Cat != "Total") {
             FL_wateruse2023 <- FL_wateruse2023 %>% filter(Caterogy %in% c(as.character(input$Cat)) ) 
             
         } else {
@@ -90,7 +112,7 @@ server <- function(input, output) {
     })
     
 
-    # Fill in the spot we created for a plot
+    ## Fill in the spot we created for a plot
     output$waterusePlot <- renderPlot({
         
         ## Render a barplot
@@ -139,13 +161,27 @@ server <- function(input, output) {
             theme(legend.justification = "left") + 
             theme(axis.title.x = element_text(family = my_font, size = 16, color = "grey30")) + 
             theme(axis.title.y = element_text(family = my_font, size = 16, color = "grey30")) +
-            theme(panel.grid = element_line(color = "white", size = 0.75)) 
+            theme(panel.grid = element_line(color = "white", size = 0.75)) + 
+            guides(color = guide_legend(nrow = 1))
             # geom_text(aes(label = round(water_use,0), y = y_label), size=5, color = "grey30", family = my_font)
 
 
         
     })
     
+    # output$wateruseTable <- renderTable(FL_wateruse2023v1)
+    
+    
+    # Downloadable csv of selected water use (by caterogy) dataset
+    output$downloadData1 <- downloadHandler(
+        filename = function() {
+            paste(input$df, ".csv", sep = "")
+        },
+        content = function(file) {
+            write.csv(df(), file, row.names = FALSE)
+        }
+    )
+        
 }
 
 shinyApp(ui = ui, server = server)
